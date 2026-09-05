@@ -1,0 +1,29 @@
+title: 우아학원 - 전국 학원·교습소 정보
+description: >-
+  전국 13만여 개 학원·교습소의 위치, 교습과목, 실제 수강료까지 한 곳에서 확인하세요.
+url: "https://wooahagwon.wooahouse.com"
+baseurl: ""
+lang: ko
+timezone: Asia/Seoul
+author: WooaHouse
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - scripts/
+  - "*.py"
+  - "*.log"
+  - "*.txt"
+  - README.md
+  - .gitignore
+  - vendor/
+  - .env

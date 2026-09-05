@@ -1,0 +1,39 @@
+name: 학원 정보 자동 갱신
+
+on:
+  schedule:
+    - cron: '0 17 * * 0'  # 매주 일요일 새벽 2시 KST (UTC 일요일 17시) - 개원/폐원 등 변동은 급식만큼 잦지 않음
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 패키지 설치
+        run: pip install -r scripts/requirements.txt
+
+      - name: 전국 학원·교습소 목록 재수집
+        run: python scripts/fetch_academy_list.py
+        env:
+          NEIS_API_KEY: ${{ secrets.NEIS_API_KEY }}
+
+      - name: 페이지용 데이터 재생성
+        run: python scripts/process_data.py
+
+      - name: 변경사항 커밋 & 푸시
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add _rawdata/ search_index.json
+          git diff --cached --quiet || git commit -m "chore: 학원 정보 자동 갱신 $(date +'%Y-%m-%d')"
+          git push

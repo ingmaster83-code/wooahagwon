@@ -1,0 +1,68 @@
+---
+layout: default
+---
+<div class="hero" style="padding:40px 20px 32px;">
+  <h1 style="font-size:1.6rem;">{{ page.doShort }} {{ page.sigungu }} {{ page.dongName }}<br><span class="accent">학원·교습소</span></h1>
+  <p>총 {{ page.totalCount }}곳</p>
+</div>
+
+<div class="breadcrumb">
+  <a href="{{ '/' | relative_url }}">홈</a> ›
+  <a href="{{ '/region/' | relative_url }}">지역별</a> ›
+  <a href="{{ '/region/' | relative_url }}{{ page.doShort }}/">{{ page.doShort }}</a> ›
+  <a href="{{ '/region/' | relative_url }}{{ page.doShort }}/{{ page.sigungu }}/">{{ page.sigungu }}</a> ›
+  <span>{{ page.dongName }}</span>
+</div>
+
+<div class="section">
+  <div class="filter-bar">
+    <input type="text" class="filter-input" id="acaFilter" placeholder="🔍 학원명·과목으로 찾기 (예: 수학, OO영어학원...)">
+  </div>
+
+  <div class="ad-slot" style="margin:0 0 20px;text-align:center;">{% include ad.html %}</div>
+
+  <div id="acaList">
+    {% for it in page.items %}
+    <div class="aca-card" data-name="{{ it.name }} {{ it.course }} {{ it.realm }}" id="aca-{{ it.id }}">
+      <div class="aca-card-top">
+        <span class="aca-card-name">{{ it.name }}</span>
+        <span class="aca-card-kind">{{ it.kind }}</span>
+      </div>
+      <div class="aca-card-meta">
+        {% if it.realm %}{{ it.realm }}{% endif %}{% if it.course %} · {{ it.course }}{% endif %}{% if it.capacity %} · 정원 {{ it.capacity }}명{% endif %}
+      </div>
+      {% if it.fee and it.fee != "" %}
+      <div class="aca-card-fee">
+        💰 {% assign fees = it.fee | split: ", " %}{% for f in fees %}{{ f }}원{% unless forloop.last %}<br>{% endunless %}{% endfor %}
+      </div>
+      {% endif %}
+      <div class="aca-card-addr">
+        📍 {{ it.addr }}{{ it.addrDetail }}{% if it.tel and it.tel != "" %} · ☎ {{ it.tel }}{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <p id="noResult" style="display:none;text-align:center;color:var(--text-muted);padding:30px 0;">검색 결과가 없어요.</p>
+
+  <div class="notice-box" style="margin-top:14px;">
+    💡 본 정보는 나이스(NEIS) 교육정보 개방포털 공공데이터를 기반으로 합니다. 수강료·정원 등은 변경될 수 있으니 정확한 내용은 해당 학원·교습소에 문의해주세요.
+  </div>
+</div>
+
+<script>
+(function(){
+  var input = document.getElementById('acaFilter');
+  var cards = document.querySelectorAll('#acaList .aca-card');
+  var noResult = document.getElementById('noResult');
+  input.addEventListener('input', function(){
+    var q = input.value.trim().toLowerCase();
+    var visible = 0;
+    cards.forEach(function(c){
+      var match = c.getAttribute('data-name').toLowerCase().indexOf(q) !== -1;
+      c.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    noResult.style.display = visible === 0 ? 'block' : 'none';
+  });
+})();
+</script>

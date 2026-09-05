@@ -1,0 +1,117 @@
+---
+layout: default
+title: 우아학원 - 전국 학원·교습소 정보
+description: 전국 13만여 개 학원·교습소의 위치, 교습과목, 실제 수강료까지 한 곳에서 확인하세요.
+---
+
+<div class="hero" id="search">
+  <h1>우리 동네 학원,<br><span class="accent">수강료는 얼마일까?</span></h1>
+  <p>전국 13만여 개 학원·교습소의 위치·교습과목·<br>실제 수강료까지 한 곳에서 확인하세요.</p>
+
+  <div class="search-wrap">
+    <input type="text" class="search-input" id="searchInput" placeholder="학원 이름으로 검색 (예: OO수학학원, OO영어교습소...)">
+    <button class="search-btn" id="searchBtn">🔍 검색</button>
+  </div>
+</div>
+
+<div id="search-results"></div>
+
+<div class="top-ad-bar">{% include ad.html %}</div>
+
+<div class="section" id="regionSection">
+  <h2 class="section-title">🗺️ 지역별로 찾기</h2>
+  <p class="section-sub">시도를 선택하면 시군구별 학원 목록을 볼 수 있어요.</p>
+  <div class="region-grid">
+    {% assign dos = site.data.aca_by_do | sort %}
+    {% for pair in dos %}
+    <a class="region-btn" href="{{ '/region/' | relative_url }}{{ pair[0] }}/">
+      <span class="region-icon">📍</span>
+      {{ pair[0] }}
+      <div class="region-count">{{ pair[1].size }}곳</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="section" style="padding-top:0;">
+  <div class="info-panel">
+    <h2>📚 우아학원은 이런 정보를 제공해요</h2>
+    <p style="color:var(--text-muted);">나이스(NEIS) 교육정보 개방포털의 공공데이터를 바탕으로, 전국 학원·교습소의 위치와 교습과목, 그리고 <strong>과목별 실제 수강료</strong>까지 정리하고 있습니다. 지도 서비스에는 없는 수강료 정보를 비교해보고 학원을 선택하는 데 참고하세요.</p>
+  </div>
+</div>
+
+<div class="section" style="padding-top:0;">
+  <div class="tips-panel">
+    <h3>💡 Tips</h3>
+    <ul>
+      <li>학원명 일부만 입력해도 검색돼요 (예: "수학"만 검색하면 관련 학원이 모두 나와요).</li>
+      <li>같은 이름의 학원이 여러 지역에 있을 수 있으니 지역을 꼭 확인하세요.</li>
+      <li>수강료는 과목·강사·시기에 따라 달라질 수 있어요.</li>
+    </ul>
+  </div>
+  <div class="faq-section">
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>모든 학원·교습소가 검색되나요?</summary>
+      <p>나이스(NEIS)에 등록된 전국 학원·교습소 중 현재 "개원" 상태인 곳을 대상으로 합니다.</p>
+    </details>
+    <details>
+      <summary>수강료 정보는 정확한가요?</summary>
+      <p>각 학원이 교육청에 신고한 교습비 기준으로, 실제와 다를 수 있습니다. 정확한 금액은 학원에 직접 확인해주세요.</p>
+    </details>
+    <details>
+      <summary>파일이나 개인정보가 서버에 저장되나요?</summary>
+      <p>아니요. 검색은 브라우저 안에서 처리되며 별도의 개인정보를 수집하지 않습니다.</p>
+    </details>
+  </div>
+</div>
+
+<script>
+var searchIndex = null;
+var fuse = null;
+
+function ensureFuseLoaded(cb) {
+  if (window.Fuse) return cb();
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js';
+  s.onload = cb;
+  document.head.appendChild(s);
+}
+
+function ensureIndexLoaded(cb) {
+  if (searchIndex) return cb();
+  fetch('{{ "/search_index.json" | relative_url }}').then(function(r){ return r.json(); }).then(function(data){
+    searchIndex = data;
+    cb();
+  });
+}
+
+function doSearch() {
+  var q = document.getElementById('searchInput').value.trim();
+  var resultsEl = document.getElementById('search-results');
+  if (!q) { resultsEl.innerHTML = ''; document.getElementById('regionSection').style.display = ''; return; }
+
+  ensureFuseLoaded(function () {
+    ensureIndexLoaded(function () {
+      if (!fuse) {
+        fuse = new Fuse(searchIndex, { keys: ['n'], threshold: 0.32, minMatchCharLength: 1 });
+      }
+      var hits = fuse.search(q).slice(0, 30);
+      document.getElementById('regionSection').style.display = 'none';
+      if (hits.length === 0) {
+        resultsEl.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:30px 0;">검색 결과가 없어요. 학원명을 다시 확인해보세요.</p>';
+        return;
+      }
+      resultsEl.innerHTML = hits.map(function (h) {
+        var it = h.item;
+        return '<div class="search-result-item"><a href="{{ "/region/" | relative_url }}' + it.do + '/' + it.sg + '/' + it.dg + '/#aca-' + it.id + '">' +
+          '<span><span class="search-result-name">' + it.n + '</span><br><span class="search-result-loc">' + it.do + ' ' + it.sg + ' ' + it.dg + ' · ' + it.k + '</span></span>' +
+          '</a></div>';
+      }).join('');
+    });
+  });
+}
+
+document.getElementById('searchBtn').addEventListener('click', doSearch);
+document.getElementById('searchInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
+</script>

@@ -1,0 +1,29 @@
+---
+layout: default
+---
+<div class="hero" style="padding:40px 20px 32px;">
+  <h1 style="font-size:1.6rem;">{{ page.doShort }} {{ page.sigungu }}<br><span class="accent">학원·교습소 정보</span></h1>
+  <p>총 {{ page.totalCount }}곳</p>
+</div>
+
+<div class="breadcrumb">
+  <a href="{{ '/' | relative_url }}">홈</a> ›
+  <a href="{{ '/region/' | relative_url }}">지역별</a> ›
+  <a href="{{ '/region/' | relative_url }}{{ page.doShort }}/">{{ page.doShort }}</a> ›
+  <span>{{ page.sigungu }}</span>
+</div>
+
+<div class="section">
+  <p class="section-sub">세부 지역(구/동)을 선택하면 학원 목록을 볼 수 있어요. 목록이 많은 지역은 여러 페이지로 나뉘어 있어요.</p>
+  <div class="region-grid">
+    {% for d in page.dongList %}
+    <a class="region-btn" href="{{ '/region/' | relative_url }}{{ page.doShort }}/{{ page.sigungu }}/{{ d.name }}/">
+      <span class="region-icon">🏫</span>
+      {{ d.name }}
+      <div class="region-count">{{ d.count }}곳</div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <div class="ad-slot" style="margin:28px 0;text-align:center;">{% include ad.html %}</div>
+</div>

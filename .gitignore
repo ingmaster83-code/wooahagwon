@@ -1,0 +1,14 @@
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+vendor/
+Gemfile.lock
+*.pyc
+__pycache__/
+
+.env
+
+# 원본 수집 덤프는 처리 중간산물이라 git에 안 올림 (100MB 넘어서 GitHub 제한 걸림,
+# process_data.py가 leaf_*.json으로 가공한 결과물만 커밋 대상)
+_rawdata/academy_raw.json
